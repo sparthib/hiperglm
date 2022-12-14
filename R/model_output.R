@@ -7,3 +7,8 @@ print.hglm <- function(hglm_out) {
 coef.hglm <- function(hglm_out) {
   return(hglm_out$coef)
 }
+
+#' @export
+vcov.hglm <- function(hglm_out) {
+  return(solve(hglm_out$info_mat)) # TODO: use more numerically stable algorithm
+}
