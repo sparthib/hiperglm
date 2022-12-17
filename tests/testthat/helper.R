@@ -19,14 +19,24 @@ approx_grad_via_finite_diff <- function(func, x, dx = 1e-6) {
 
 simulate_data <- function(
     n_obs, n_pred, model = "linear", intercept = NULL, 
-    coef_true = NULL, design = NULL, seed = NULL, signal_to_noise = 0.1
+    coef_true = NULL, design = NULL, seed = NULL, signal_to_noise = NULL
   ) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
+  if ((model != "linear")  && !is.null(signal_to_noise)) {
+    warning(paste(
+      "The `signal_to_noise` arg is currently unsupported for non-linear models",
+      "and will be ignored."
+    ))
+    signal_to_noise <- NULL
+  }
+  if (is.null(signal_to_noise)) {
+    signal_to_noise <- 0.1
+  } 
   if (is.null(coef_true)) {
     coef_true <- rnorm(n_pred, sd = 1 / sqrt(n_pred))
-  }
+  } 
   if (is.null(design)) {
     design <- matrix(rnorm(n_obs * n_pred), nrow = n_obs, ncol = n_pred)
   }
@@ -38,8 +48,14 @@ simulate_data <- function(
     design <- cbind(rep(1, n_obs), design)
   }
   expected_mean <- as.vector(design %*% coef_true)
-  noise_magnitude <- sqrt(var(expected_mean) / signal_to_noise^2)
-  noise <- noise_magnitude * rnorm(n_obs)
-  outcome <- expected_mean + noise
+  if (model == 'linear') {
+    noise_magnitude <- sqrt(var(expected_mean) / signal_to_noise^2)
+    noise <- noise_magnitude * rnorm(n_obs)
+    outcome <- expected_mean + noise 
+  } else {
+    n_trial <- 1
+    prob <- 1 / (1 + exp(-expected_mean))
+    outcome <- rbinom(n_obs, n_trial, prob)
+  }
   return(list(design = design, outcome = outcome, coef_true = coef_true))
 }
