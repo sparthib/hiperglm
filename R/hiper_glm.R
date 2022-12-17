@@ -20,7 +20,7 @@ find_mle <- function(design, outcome, model, option) {
       stop("Not yet implemented.")
     }
   } else {
-    result <- solve_via_optim(design, outcome, option$mle_solver)
+    result <- solve_via_optim(design, outcome, model, option$mle_solver)
   }
   return(result)
 }
@@ -37,13 +37,22 @@ solve_via_least_sq <- function(design, outcome) {
   return(list(coef = mle_coef, info_mat = info_mat))
 }
 
-solve_via_optim <- function(design, outcome, method) {
+solve_via_optim <- function(design, outcome, model, method) {
   init_coef <- rep(0, ncol(design))
-  obj_fn <- function (coef) {
-    calc_linear_loglik(coef, design, outcome) 
-  }
-  obj_grad <- function (coef) {
-    calc_linear_grad(coef, design, outcome)
+  if (model == 'linear') {
+    obj_fn <- function (coef) {
+      calc_linear_loglik(coef, design, outcome) 
+    }
+    obj_grad <- function (coef) {
+      calc_linear_grad(coef, design, outcome)
+    }
+  } else {
+    obj_fn <- function (coef) {
+      calc_logit_loglik(coef, design, outcome) 
+    }
+    obj_grad <- function (coef) {
+      calc_logit_grad(coef, design, outcome)
+    }
   }
   optim_result <- stats::optim(
     init_coef, obj_fn, obj_grad, method = method,
