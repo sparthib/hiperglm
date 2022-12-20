@@ -31,7 +31,8 @@ solve_via_least_sq <- function(design, outcome) {
   mle_coef <- as.vector(mle_coef)
   noise_var <- mean((outcome - design %*% mle_coef)^2)
   n_obs <- nrow(design); n_pred <- ncol(design)
-  noise_var <- noise_var / (1 - (n_pred - 1) / n_obs) # Unbias the estimator
+  noise_var <- noise_var / (1 - n_pred / n_obs) 
+  # Use the same nearly-unbiased estimator as in `stats::lm`
   info_mat <- XTX / noise_var
   return(list(coef = mle_coef, info_mat = info_mat))
 }
