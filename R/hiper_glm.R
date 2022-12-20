@@ -6,7 +6,7 @@ hiper_glm <- function(design, outcome, model = "linear", option = list()) {
   }
   warning("`hiper_glm` is yet to be implemented.")
   mle <- find_mle(design, outcome, model, option)
-  hglm_out <- list(coef = mle$coef)
+  hglm_out <- list(coef = mle$coef, info_mat = mle$info_mat)
   class(hglm_out) <- "hglm"
   return(hglm_out)
 }
@@ -26,9 +26,14 @@ find_mle <- function(design, outcome, model, option) {
 }
 
 solve_via_least_sq <- function(design, outcome) {
-  mle_coef <- solve(t(design) %*% design, t(design) %*% outcome)
+  XTX <- t(design) %*% design 
+  mle_coef <- solve(XTX, t(design) %*% outcome)
   mle_coef <- as.vector(mle_coef)
-  return(list(coef = mle_coef))
+  noise_var <- mean((outcome - design %*% mle_coef)^2)
+  n_obs <- nrow(design); n_pred <- ncol(design)
+  noise_var <- noise_var / (1 - (n_pred - 1) / n_obs) # Unbias the estimator
+  info_mat <- XTX / noise_var
+  return(list(coef = mle_coef, info_mat = info_mat))
 }
 
 solve_via_optim <- function(design, outcome, method) {
