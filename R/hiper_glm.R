@@ -16,7 +16,7 @@ find_mle <- function(design, outcome, model, option) {
     if (model == 'linear') {
       result <- solve_via_least_sq(design, outcome)
     } else {
-      result <- solve_via_newton(design, outcome)
+      result <- solve_via_newton(design, outcome, option$n_max_iter)
     }
   } else {
     result <- solve_via_optim(design, outcome, model, option$mle_solver)
@@ -36,8 +36,8 @@ solve_via_least_sq <- function(design, outcome) {
   return(list(coef = mle_coef, info_mat = info_mat))
 }
 
-
-solve_via_newton <- function(design, outcome, n_max_iter = 25L) {
+solve_via_newton <- function(design, outcome, n_max_iter) {
+  if (is.null(n_max_iter)) { n_max_iter = 25L }
   coef_est <- rep(0, ncol(design))
   n_iter <- 0L
   max_iter_reached <- FALSE
