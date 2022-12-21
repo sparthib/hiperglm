@@ -36,3 +36,16 @@ calc_logit_grad <- function(
   grad <- as.vector(grad)
   return(grad)
 }
+
+calc_logit_hessian <- function(
+    reg_coef, design, n_success, n_trial = NULL
+) {
+  if (is.null(n_trial)) {
+    n_trial <- rep(1, length(n_success))
+  }
+  logit_prob <- as.vector(design %*% reg_coef)
+  predicted_prob <- 1 / (1 + exp(-logit_prob))
+  weight <- n_trial * predicted_prob * (1 - predicted_prob)
+  hess <- - t(design) %*% (outer(weight, rep(1, ncol(design))) * design)
+  return(hess)
+}

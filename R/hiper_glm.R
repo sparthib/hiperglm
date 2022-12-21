@@ -16,8 +16,7 @@ find_mle <- function(design, outcome, model, option) {
     if (model == 'linear') {
       result <- solve_via_least_sq(design, outcome)
     } else {
-      # TODO: implement iteratively reweighted least-sq
-      stop("Not yet implemented.")
+      result <- solve_via_newton(design, outcome)
     }
   } else {
     result <- solve_via_optim(design, outcome, model, option$mle_solver)
@@ -35,6 +34,23 @@ solve_via_least_sq <- function(design, outcome) {
   # Use the same nearly-unbiased estimator as in `stats::lm`
   info_mat <- XTX / noise_var
   return(list(coef = mle_coef, info_mat = info_mat))
+}
+
+
+solve_via_newton <- function(design, outcome, n_max_iter = 25L) {
+  coef_est <- rep(0, ncol(design))
+  n_iter <- 0L
+  max_iter_reached <- FALSE
+  converged <- FALSE
+  while (!(converged || max_iter_reached)) {
+    grad <- calc_logit_grad(coef_est, design, outcome)
+    hess <- calc_logit_hessian(coef_est, design, outcome)
+    coef_est <- coef_est - solve(hess, grad)
+    # TODO: implement check for convergence
+    n_iter <- n_iter + 1L
+    max_iter_reached <- (n_iter == n_max_iter)
+  }
+  return(list(coef = coef_est, info_mat = - hess, converged = converged))
 }
 
 solve_via_optim <- function(design, outcome, model, method) {
