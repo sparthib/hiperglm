@@ -15,5 +15,7 @@ test_that("`hglm` logit model est coincides with `glm` one", {
   glm_out <- stats::glm(outcome ~ design + 0, family = binomial('logit'))
   hglm_out <- hiper_glm(design, outcome, model = 'logit')
   expect_true(are_all_close(coef(hglm_out), coef(glm_out)))
-  # TODO: test covariance estimate
+  expect_true(are_all_close(
+    as.vector(vcov(hglm_out)), as.vector(vcov(glm_out))
+  ))
 })
