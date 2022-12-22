@@ -19,21 +19,17 @@ approx_grad_via_finite_diff <- function(func, x, dx = 1e-6) {
 
 simulate_data <- function(
     n_obs, n_pred, model = "linear", intercept = NULL, 
-    coef_true = NULL, design = NULL, seed = NULL, signal_to_noise = NULL
-  ) {
+    coef_true = NULL, design = NULL, seed = NULL, option = list()
+) {
   if (!is.null(seed)) {
     set.seed(seed)
   }
-  if ((model != "linear")  && !is.null(signal_to_noise)) {
+  if ((model != "linear")  && !is.null(option$signal_to_noise)) {
     warning(paste(
-      "The `signal_to_noise` arg is currently unsupported for non-linear models",
-      "and will be ignored."
+      "The `signal_to_noise` option is currently unsupported for",
+      "non-linear models and will be ignored."
     ))
-    signal_to_noise <- NULL
   }
-  if (is.null(signal_to_noise)) {
-    signal_to_noise <- 0.1
-  } 
   if (is.null(coef_true)) {
     coef_true <- rnorm(n_pred, sd = 1 / sqrt(n_pred))
   } 
@@ -49,6 +45,10 @@ simulate_data <- function(
   }
   expected_mean <- as.vector(design %*% coef_true)
   if (model == 'linear') {
+    signal_to_noise <- option$signal_to_noise
+    if (is.null(signal_to_noise)) {
+      signal_to_noise <- 0.1
+    }
     noise_magnitude <- sqrt(var(expected_mean) / signal_to_noise^2)
     noise <- noise_magnitude * rnorm(n_obs)
     outcome <- expected_mean + noise 
@@ -59,3 +59,4 @@ simulate_data <- function(
   }
   return(list(design = design, outcome = outcome, coef_true = coef_true))
 }
+
