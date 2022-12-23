@@ -12,11 +12,14 @@ calc_linear_grad <- function(reg_coef, design, outcome, noise_var = 1) {
 }
 
 calc_logit_loglik <- function(
-    reg_coef, design, n_success, n_trial = NULL
+    reg_coef, design, outcome
 ) {
-  if (is.null(n_trial)) {
-    # Assume binary outcome unless otherwise specified.
-    n_trial <- rep(1, length(n_success))
+  if (is.list(outcome)) {
+    n_success <- outcome$n_success
+    n_trial <- outcome$n_trial
+  } else {
+    n_success <- outcome
+    n_trial <- rep(1, length(n_success)) # Assume binary outcome
   }
   logit_prob <- design %*% reg_coef
   loglik <- sum(n_success * logit_prob - n_trial * log(1 + exp(logit_prob)))
@@ -24,11 +27,13 @@ calc_logit_loglik <- function(
   return(loglik)
 }
 
-calc_logit_grad <- function(
-    reg_coef, design, n_success, n_trial = NULL
-) {
-  if (is.null(n_trial)) {
-    n_trial <- rep(1, length(n_success))
+calc_logit_grad <- function(reg_coef, design, outcome) {
+  if (is.list(outcome)) {
+    n_success <- outcome$n_success
+    n_trial <- outcome$n_trial
+  } else {
+    n_success <- outcome
+    n_trial <- rep(1, length(n_success)) # Assume binary outcome
   }
   logit_prob <- design %*% reg_coef
   predicted_prob <- 1 / (1 + exp(-logit_prob))
@@ -37,11 +42,13 @@ calc_logit_grad <- function(
   return(grad)
 }
 
-calc_logit_hessian <- function(
-    reg_coef, design, n_success, n_trial = NULL
-) {
-  if (is.null(n_trial)) {
-    n_trial <- rep(1, length(n_success))
+calc_logit_hessian <- function(reg_coef, design, outcome) {
+  if (is.list(outcome)) {
+    n_success <- outcome$n_success
+    n_trial <- outcome$n_trial
+  } else {
+    n_success <- outcome
+    n_trial <- rep(1, length(n_success)) # Assume binary outcome
   }
   logit_prob <- as.vector(design %*% reg_coef)
   predicted_prob <- 1 / (1 + exp(-logit_prob))
