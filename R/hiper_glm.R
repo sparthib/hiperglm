@@ -59,6 +59,9 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
     n_iter <- n_iter + 1L
     max_iter_reached <- (n_iter == n_max_iter)
   }
+  if (max_iter_reached && !converged) {
+    warning("Newton's method did not converge. The estimates may be meaningless.")
+  }
   return(list(coef = coef_est, info_mat = - hess, converged = converged))
 }
 
