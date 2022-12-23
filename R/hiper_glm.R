@@ -5,8 +5,7 @@ hiper_glm <- function(design, outcome, model = "linear", option = list()) {
     stop(sprintf("The model %s is not supported.", model))
   }
   warning("`hiper_glm` is yet to be implemented.")
-  mle <- find_mle(design, outcome, model, option)
-  hglm_out <- list(coef = mle$coef, info_mat = mle$info_mat)
+  hglm_out <- find_mle(design, outcome, model, option)
   class(hglm_out) <- "hglm"
   return(hglm_out)
 }
@@ -62,7 +61,9 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   if (max_iter_reached && !converged) {
     warning("Newton's method did not converge. The estimates may be meaningless.")
   }
-  return(list(coef = coef_est, info_mat = - hess, converged = converged))
+  return(list(
+    coef = coef_est, info_mat = - hess, converged = converged, n_iter = n_iter
+  ))
 }
 
 solve_via_optim <- function(design, outcome, model, method) {
