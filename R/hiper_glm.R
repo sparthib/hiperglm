@@ -16,7 +16,9 @@ find_mle <- function(design, outcome, model, option) {
     if (model == 'linear') {
       result <- solve_via_least_sq(design, outcome)
     } else {
-      result <- solve_via_newton(design, outcome, option$n_max_iter)
+      result <- solve_via_newton(
+        design, outcome, option$n_max_iter, option$rel_tol, option$abs_tol
+      )
     }
   } else {
     result <- solve_via_optim(design, outcome, model, option$mle_solver)
@@ -36,17 +38,24 @@ solve_via_least_sq <- function(design, outcome) {
   return(list(coef = mle_coef, info_mat = info_mat))
 }
 
-solve_via_newton <- function(design, outcome, n_max_iter) {
-  if (is.null(n_max_iter)) { n_max_iter = 25L }
+solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
+  if (is.null(n_max_iter)) { n_max_iter <- 25L }
+  if (is.null(rel_tol)) { rel_tol <- 1e-6 }
+  if (is.null(abs_tol)) { abs_tol <- 1e-6 }
   coef_est <- rep(0, ncol(design))
   n_iter <- 0L
   max_iter_reached <- FALSE
   converged <- FALSE
+  curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
   while (!(converged || max_iter_reached)) {
+    prev_loglik <- curr_loglik
     grad <- calc_logit_grad(coef_est, design, outcome)
     hess <- calc_logit_hessian(coef_est, design, outcome)
     coef_est <- coef_est - solve(hess, grad)
-    # TODO: implement check for convergence
+    curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
+    converged <- (
+      2 * abs(curr_loglik - prev_loglik) < (abs_tol + rel_tol * abs(curr_loglik))
+    )
     n_iter <- n_iter + 1L
     max_iter_reached <- (n_iter == n_max_iter)
   }
