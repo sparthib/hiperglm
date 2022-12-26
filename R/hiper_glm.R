@@ -25,14 +25,13 @@ find_mle <- function(design, outcome, model, option) {
 }
 
 solve_via_least_sq <- function(design, outcome) {
-  XTX <- t(design) %*% design 
-  mle_coef <- solve(XTX, t(design) %*% outcome)
-  mle_coef <- as.vector(mle_coef)
+  mle_coef <- solve_least_sq_via_qr(design, outcome)$solution
   noise_var <- mean((outcome - design %*% mle_coef)^2)
   n_obs <- nrow(design); n_pred <- ncol(design)
   noise_var <- noise_var / (1 - n_pred / n_obs) 
-  # Use the same nearly-unbiased estimator as in `stats::lm`
-  info_mat <- XTX / noise_var
+    # Use the same nearly-unbiased estimator as in `stats::lm`
+  info_mat <- t(design) %*% design / noise_var
+    # TODO: avoid redundant calculation and subseq inversion of Fisher info
   return(list(coef = mle_coef, info_mat = info_mat))
 }
 
