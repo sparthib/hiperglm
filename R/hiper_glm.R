@@ -4,7 +4,6 @@ hiper_glm <- function(design, outcome, model = "linear", option = list()) {
   if (!(model %in% supported_model)) {
     stop(sprintf("The model %s is not supported.", model))
   }
-  warning("`hiper_glm` is yet to be implemented.")
   hglm_out <- find_mle(design, outcome, model, option)
   class(hglm_out) <- "hglm"
   return(hglm_out)
