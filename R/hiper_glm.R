@@ -64,10 +64,28 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   ))
 }
 
-take_one_newton_step <- function(coef_est, design, outcome) {
-  grad <- calc_logit_grad(coef_est, design, outcome)
-  hess <- calc_logit_hessian(coef_est, design, outcome)
-  coef_est <- coef_est - solve(hess, grad)
+take_one_newton_step <- function(
+    coef_est, design, outcome, solver = "weighted-leqst-sq"
+) {
+  if (solver == "weighted-leqst-sq") {
+    loglink_grad <- 
+      calc_logit_loglink_deriv(coef_est, design, outcome, order = 1)
+    weight <- calc_logit_loglink_deriv(coef_est, design, outcome, order = 2)
+    if (any(weight == 0)) {
+      stop("Exact 0 or 1 found in predicted probability while solving for MLE.")
+        # TODO: pursue alternative path forward in this case. Maybe just fall 
+        # back on a Newton step with explicit computation of weighted Hessian. 
+    }
+    ls_target_vec <- loglink_grad / weight
+    coef_update <- solve_least_sq_via_qr(design, ls_target_vec, weight)$solution
+    hess <- calc_logit_hessian(coef_est, design, outcome)
+      # TODO: avoid redundant calculation and subseq inversion of Fisher info
+  } else {
+    grad <- calc_logit_grad(coef_est, design, outcome)
+    hess <- calc_logit_hessian(coef_est, design, outcome)
+    coef_update <- - solve(hess, grad)
+  }
+  coef_est <- coef_est + coef_update
   return(list(coef_est = coef_est, hess = hess))
 }
 
