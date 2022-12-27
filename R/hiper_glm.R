@@ -46,8 +46,7 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
   while (!(converged || max_iter_reached)) {
     prev_loglik <- curr_loglik
-    newton_step_out <- take_one_newton_step(coef_est, design, outcome)
-    coef_est <- newton_step_out$coef_est
+    coef_est <- take_one_newton_step(coef_est, design, outcome)
     curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
     converged <- (
       2 * abs(curr_loglik - prev_loglik) < (abs_tol + rel_tol * abs(curr_loglik))
@@ -79,15 +78,13 @@ take_one_newton_step <- function(
     }
     ls_target_vec <- loglink_grad / weight
     coef_update <- solve_least_sq_via_qr(design, ls_target_vec, weight)$solution
-    hess <- calc_logit_hessian(coef_est, design, outcome)
-      # TODO: avoid redundant calculation and subseq inversion of Fisher info
   } else {
     grad <- calc_logit_grad(coef_est, design, outcome)
     hess <- calc_logit_hessian(coef_est, design, outcome)
     coef_update <- - solve(hess, grad)
   }
   coef_est <- coef_est + coef_update
-  return(list(coef_est = coef_est, hess = hess))
+  return(coef_est = coef_est)
 }
 
 solve_via_optim <- function(design, outcome, model, method) {
