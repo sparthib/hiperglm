@@ -46,9 +46,8 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
   while (!(converged || max_iter_reached)) {
     prev_loglik <- curr_loglik
-    grad <- calc_logit_grad(coef_est, design, outcome)
-    hess <- calc_logit_hessian(coef_est, design, outcome)
-    coef_est <- coef_est - solve(hess, grad)
+    newton_step_out <- take_one_newton_step(coef_est, design, outcome)
+    coef_est <- newton_step_out$coef_est
     curr_loglik <- calc_logit_loglik(coef_est, design, outcome)
     converged <- (
       2 * abs(curr_loglik - prev_loglik) < (abs_tol + rel_tol * abs(curr_loglik))
@@ -60,8 +59,16 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
     warning("Newton's method did not converge. The estimates may be meaningless.")
   }
   return(list(
-    coef = coef_est, info_mat = - hess, converged = converged, n_iter = n_iter
+    coef = coef_est, info_mat = - newton_step_out$hess, 
+    converged = converged, n_iter = n_iter
   ))
+}
+
+take_one_newton_step <- function(coef_est, design, outcome) {
+  grad <- calc_logit_grad(coef_est, design, outcome)
+  hess <- calc_logit_hessian(coef_est, design, outcome)
+  coef_est <- coef_est - solve(hess, grad)
+  return(list(coef_est = coef_est, hess = hess))
 }
 
 solve_via_optim <- function(design, outcome, model, method) {
