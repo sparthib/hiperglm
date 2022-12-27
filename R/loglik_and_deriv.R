@@ -28,21 +28,19 @@ calc_logit_loglik <- function(
 }
 
 calc_logit_grad <- function(reg_coef, design, outcome) {
-  if (is.list(outcome)) {
-    n_success <- outcome$n_success
-    n_trial <- outcome$n_trial
-  } else {
-    n_success <- outcome
-    n_trial <- rep(1, length(n_success)) # Assume binary outcome
-  }
-  logit_prob <- design %*% reg_coef
-  predicted_prob <- 1 / (1 + exp(-logit_prob))
-  grad <- t(design) %*% (n_success - n_trial * predicted_prob)
+  loglink_grad <- calc_logit_loglink_deriv(reg_coef, design, outcome, order = 1)
+  grad <- t(design) %*% loglink_grad
   grad <- as.vector(grad)
   return(grad)
 }
 
 calc_logit_hessian <- function(reg_coef, design, outcome) {
+  weight <- calc_logit_loglink_deriv(reg_coef, design, outcome, order = 2)
+  hess <- - t(design) %*% (outer(weight, rep(1, ncol(design))) * design)
+  return(hess)
+}
+
+calc_logit_loglink_deriv <- function(reg_coef, design, outcome, order) {
   if (is.list(outcome)) {
     n_success <- outcome$n_success
     n_trial <- outcome$n_trial
@@ -52,7 +50,13 @@ calc_logit_hessian <- function(reg_coef, design, outcome) {
   }
   logit_prob <- as.vector(design %*% reg_coef)
   predicted_prob <- 1 / (1 + exp(-logit_prob))
-  weight <- n_trial * predicted_prob * (1 - predicted_prob)
-  hess <- - t(design) %*% (outer(weight, rep(1, ncol(design))) * design)
-  return(hess)
+  if (order == 1) {
+    deriv <- n_success - n_trial * predicted_prob
+  } else if (order == 2) {
+    deriv <- n_trial * predicted_prob * (1 - predicted_prob)
+  } else {
+    stop("3rd+ order derivative calculations are not supported")
+  }
+  deriv <- as.vector(deriv)
+  return(deriv)
 }
