@@ -1,5 +1,9 @@
-# Solve for the L2-norm minimizer of X %*% beta - y
-solve_least_sq_via_qr <- function(X, y) {
+# Solve for the L2-norm minimizer of sqrt(weight) * (X %*% beta - y)
+solve_least_sq_via_qr <- function(X, y, weight = NULL) {
+  if (!is.null(weight)) {
+    X <- outer(sqrt(weight), rep(1, ncol(X))) * X
+    y <- sqrt(weight) * y
+  }
   qr_decomp <- qr_wrapper(X) 
   Q <- qr_decomp$Q; R <- qr_decomp$R
   solution <- backsolve(R, t(Q) %*% y)
