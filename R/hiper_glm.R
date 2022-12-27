@@ -58,8 +58,9 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   if (max_iter_reached && !converged) {
     warning("Newton's method did not converge. The estimates may be meaningless.")
   }
+  info_mat <- - calc_logit_hessian(coef_est, design, outcome)
   return(list(
-    coef = coef_est, info_mat = - newton_step_out$hess, 
+    coef = coef_est, info_mat = info_mat, 
     converged = converged, n_iter = n_iter
   ))
 }
