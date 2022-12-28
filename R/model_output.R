@@ -10,5 +10,5 @@ coef.hglm <- function(hglm_out) {
 
 #' @export
 vcov.hglm <- function(hglm_out) {
-  return(solve(hglm_out$info_mat)) # TODO: use more numerically stable algorithm
+  return(hglm_out$cov)
 }

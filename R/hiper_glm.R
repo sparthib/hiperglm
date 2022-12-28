@@ -25,14 +25,14 @@ find_mle <- function(design, outcome, model, option) {
 }
 
 solve_via_least_sq <- function(design, outcome) {
-  mle_coef <- solve_least_sq_via_qr(design, outcome)$solution
+  ls_result <- solve_least_sq_via_qr(design, outcome)
+  mle_coef <- ls_result$solution
   noise_var <- mean((outcome - design %*% mle_coef)^2)
   n_obs <- nrow(design); n_pred <- ncol(design)
   noise_var <- noise_var / (1 - n_pred / n_obs) 
     # Use the same nearly-unbiased estimator as in `stats::lm`
-  info_mat <- t(design) %*% design / noise_var
-    # TODO: avoid redundant calculation and subseq inversion of Fisher info
-  return(list(coef = mle_coef, info_mat = info_mat))
+  cov_est <- noise_var * invert_gram_mat_from_qr(ls_result$R)
+  return(list(coef = mle_coef, cov_est = cov_est))
 }
 
 solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
@@ -57,9 +57,9 @@ solve_via_newton <- function(design, outcome, n_max_iter, rel_tol, abs_tol) {
   if (max_iter_reached && !converged) {
     warning("Newton's method did not converge. The estimates may be meaningless.")
   }
-  info_mat <- - calc_logit_hessian(coef_est, design, outcome)
+  cov_est <- - calc_logit_hessian_inverse(coef_est, design, outcome)
   return(list(
-    coef = coef_est, info_mat = info_mat, 
+    coef = coef_est, cov = cov_est, 
     converged = converged, n_iter = n_iter
   ))
 }

@@ -40,6 +40,14 @@ calc_logit_hessian <- function(reg_coef, design, outcome) {
   return(hess)
 }
 
+calc_logit_hessian_inverse <- function(reg_coef, design, outcome) {
+  weight <- calc_logit_loglink_deriv(reg_coef, design, outcome, order = 2)
+  sqrt_weighted_design <- outer(sqrt(weight), rep(1, ncol(design))) * design
+  R <- qr_wrapper(sqrt_weighted_design)$R
+  inverse <- - invert_gram_mat_from_qr(R)
+  return(inverse)
+}
+
 calc_logit_loglink_deriv <- function(reg_coef, design, outcome, order) {
   if (is.list(outcome)) {
     n_success <- outcome$n_success
