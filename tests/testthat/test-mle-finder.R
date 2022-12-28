@@ -36,3 +36,15 @@ test_that("vanilla/weighted least-sq Newton updates coincide", {
     take_one_newton_step(init_coef, design, outcome, solver = "normal-eq")
   expect_true(are_all_close(wls_updated_coef, ne_updated_coef))
 })
+
+test_that("direct/via-QR inversion of the Gram matrix coincide", {
+  set.seed(1918)
+  n_row <- 32; n_col <- 4
+  X <- matrix(rnorm(n_row * n_col), nrow = n_row, ncol = n_col)
+  direct_inverse <- solve(t(X) %*% X)
+  R <- qr_wrapper(X)$R
+  qr_inverse <- invert_gram_mat_from_qr(R)
+  expect_true(are_all_close(
+    as.vector(direct_inverse), as.vector(qr_inverse)
+  ))
+})

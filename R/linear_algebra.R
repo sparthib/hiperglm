@@ -11,6 +11,11 @@ solve_least_sq_via_qr <- function(X, y, weight = NULL) {
   return(list(solution = solution, Q = Q, R = R))
 }
 
+# Find an inverse of the gram matrix t(X) %*% X from the QR factor of X
+invert_gram_mat_from_qr <- function(R) {
+  return(chol2inv(R))
+}
+
 # Returns un-pivoted (Q, R) factors so that X == Q %*% R
 qr_wrapper <- function(X) {
   qr_result <- qr(X)
