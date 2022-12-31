@@ -48,3 +48,13 @@ test_that("direct/via-QR inversion of the Gram matrix coincide", {
     as.vector(direct_inverse), as.vector(qr_inverse)
   ))
 })
+
+test_that("least square via built-in and Eigen QR coincide", {
+  set.seed(1918)
+  n_row <- 32; n_col <- 4
+  X <- matrix(rnorm(n_row * n_col), nrow = n_row, ncol = n_col)
+  y <- rnorm(n_row)
+  eigen_sol <- solve_leqst_sq_via_qr_cpp_eig(X, y)
+  lapack_sol <- solve_least_sq_via_qr(X, y)$solution
+  expect_true(are_all_close(eigen_sol, lapack_sol))
+})
