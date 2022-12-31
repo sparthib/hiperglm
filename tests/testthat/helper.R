@@ -1,4 +1,7 @@
 are_all_close <- function(v, w, abs_tol = 1e-6, rel_tol = 1e-6) {
+  if (!(is.numeric(v) && is.numeric(w))) {
+    stop("Input args must be numeric.")
+  }
   abs_diff <- abs(v - w)
   are_all_within_atol <- all(abs_diff < abs_tol)
   are_all_within_rtol <- all(abs_diff < rel_tol * pmax(abs(v), abs(w)))
