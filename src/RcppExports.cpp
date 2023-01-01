@@ -13,7 +13,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // solve_leqst_sq_via_qr_cpp_eig
-VectorXd solve_leqst_sq_via_qr_cpp_eig(const Map<MatrixXd> X, const Map<VectorXd> y);
+List solve_leqst_sq_via_qr_cpp_eig(const Map<MatrixXd> X, const Map<VectorXd> y);
 RcppExport SEXP _hiperglm_solve_leqst_sq_via_qr_cpp_eig(SEXP XSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;

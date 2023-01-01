@@ -5,10 +5,16 @@
 
 // Solve for the l2-norm minimizer of X %*% beta - y
 // [[Rcpp::export]]
-VectorXd solve_leqst_sq_via_qr_cpp_eig(
+List solve_leqst_sq_via_qr_cpp_eig(
     const Map<MatrixXd> X, const Map<VectorXd> y
 ) {
   Eigen::HouseholderQR<MatrixXd> qr(X);
   VectorXd solution = qr.solve(y);
-  return solution;
+  int n_col = X.cols();
+  MatrixXd R_inv = qr.matrixQR().topRows(n_col).triangularView<Eigen::Upper>().solve(MatrixXd::Identity(n_col, n_col));
+  MatrixXd inverse_gram_mat = R_inv * R_inv.transpose();
+  return List::create(
+    _["solution"] = solution,
+    _["inverse_gram"] = inverse_gram_mat
+  );
 }
