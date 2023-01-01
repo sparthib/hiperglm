@@ -1,14 +1,19 @@
 # Solve for the L2-norm minimizer of sqrt(weight) * (X %*% beta - y)
-solve_least_sq_via_qr <- function(X, y, weight = NULL) {
+solve_least_sq_via_qr <- function(X, y, weight = NULL, use_eigen = TRUE) {
   if (!is.null(weight)) {
     X <- outer(sqrt(weight), rep(1, ncol(X))) * X
     y <- sqrt(weight) * y
   }
-  out <- qr_wrapper(X)
-  qr_decomp <- out$qr_decomp; R <- out$R
-  solution <- solve(qr_decomp, y)
-  solution <- as.vector(solution)
-  return(list(solution = solution, R = R))
+  y <- as.numeric(y) # Ensure `double`
+  if (use_eigen) {
+    ls_result <- solve_least_sq_via_qr_cpp_eig(X, y)
+  } else {
+    out <- qr_wrapper(X)
+    qr_decomp <- out$qr_decomp; R <- out$R
+    solution <- as.vector(solve(qr_decomp, y))
+    ls_result <- list(solution = solution, R = R)
+  }
+  return(ls_result)
 }
 
 # Find an inverse of the gram matrix t(X) %*% X from the QR factor of X
