@@ -54,9 +54,9 @@ test_that("least square via built-in and Eigen QR coincide", {
   n_row <- 32; n_col <- 4
   X <- matrix(rnorm(n_row * n_col), nrow = n_row, ncol = n_col)
   y <- rnorm(n_row)
-  eigen_qr <- solve_least_sq_via_qr_cpp_eig(X, y, require_inverse_gram = TRUE)
+  eigen_qr <- solve_least_sq_via_qr_cpp_eig(X, y)
   eigen_sol <- eigen_qr$solution
-  eigen_gram_mat <- eigen_qr$inverse_gram
+  eigen_gram_mat <- invert_gram_mat_from_qr(eigen_qr$R)
   lapack_qr <- solve_least_sq_via_qr(X, y)
   lapack_sol <- lapack_qr$solution
   lapack_gram_mat <- invert_gram_mat_from_qr(lapack_qr$R)
