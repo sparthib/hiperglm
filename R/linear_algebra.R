@@ -21,14 +21,10 @@ invert_gram_mat_from_qr <- function(R) {
   return(chol2inv(R))
 }
 
-# Return un-pivoted (Q, R) factors so that X == Q %*% R
-qr_wrapper <- function(X, require_Q = FALSE) {
+# Return the QR decomposition along with the unpivoted "R" factor so that X == Q %*% R
+qr_wrapper <- function(X) {
   qr_decomp <- qr(X)
   R <- qr.R(qr_decomp)
   R <- R[ , order(qr_decomp$pivot)]
-  result <- list(qr_decomp = qr_decomp, R = R)
-  if (require_Q) {
-    result$Q <- qr.Q(qr_decomp)
-  }
-  return(result)
+  return(list(qr_decomp = qr_decomp, R = R))
 }
