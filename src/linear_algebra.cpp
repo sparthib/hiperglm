@@ -5,7 +5,7 @@
 
 // Solve for the l2-norm minimizer of X %*% beta - y
 // [[Rcpp::export]]
-List solve_leqst_sq_via_qr_cpp_eig(
+List solve_least_sq_via_qr_cpp_eig(
     const Map<MatrixXd> X, const Map<VectorXd> y, 
     bool require_inverse_gram = false
 ) {
