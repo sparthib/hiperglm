@@ -13,21 +13,20 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // solve_least_sq_via_qr_cpp_eig
-List solve_least_sq_via_qr_cpp_eig(const Map<MatrixXd> X, const Map<VectorXd> y, bool require_inverse_gram);
-RcppExport SEXP _hiperglm_solve_least_sq_via_qr_cpp_eig(SEXP XSEXP, SEXP ySEXP, SEXP require_inverse_gramSEXP) {
+List solve_least_sq_via_qr_cpp_eig(const Map<MatrixXd> X, const Map<VectorXd> y);
+RcppExport SEXP _hiperglm_solve_least_sq_via_qr_cpp_eig(SEXP XSEXP, SEXP ySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< const Map<MatrixXd> >::type X(XSEXP);
     Rcpp::traits::input_parameter< const Map<VectorXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< bool >::type require_inverse_gram(require_inverse_gramSEXP);
-    rcpp_result_gen = Rcpp::wrap(solve_least_sq_via_qr_cpp_eig(X, y, require_inverse_gram));
+    rcpp_result_gen = Rcpp::wrap(solve_least_sq_via_qr_cpp_eig(X, y));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_hiperglm_solve_least_sq_via_qr_cpp_eig", (DL_FUNC) &_hiperglm_solve_least_sq_via_qr_cpp_eig, 3},
+    {"_hiperglm_solve_least_sq_via_qr_cpp_eig", (DL_FUNC) &_hiperglm_solve_least_sq_via_qr_cpp_eig, 2},
     {NULL, NULL, 0}
 };
 
