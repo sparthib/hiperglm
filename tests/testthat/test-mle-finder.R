@@ -42,8 +42,7 @@ test_that("direct/via-QR inversion of the Gram matrix coincide", {
   n_row <- 32; n_col <- 4
   X <- matrix(rnorm(n_row * n_col), nrow = n_row, ncol = n_col)
   direct_inverse <- solve(t(X) %*% X)
-  dummy_y <- rep(0, nrow(X))
-  R <- solve_least_sq_via_qr(X, dummy_y)$R
+  R <- qr_wrapper(X)$R
   qr_inverse <- invert_gram_mat_from_qr(R)
   expect_true(are_all_close(
     as.vector(direct_inverse), as.vector(qr_inverse)

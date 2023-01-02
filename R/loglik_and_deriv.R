@@ -43,10 +43,7 @@ calc_logit_hessian <- function(reg_coef, design, outcome) {
 calc_logit_hessian_inverse <- function(reg_coef, design, outcome) {
   weight <- calc_logit_loglink_deriv(reg_coef, design, outcome, order = 2)
   sqrt_weighted_design <- outer(sqrt(weight), rep(1, ncol(design))) * design
-  dummy_outcome <- rep(0, nrow(design))
-  R <- solve_least_sq_via_qr(sqrt_weighted_design, dummy_outcome)$R
-    # Just convenient way to get the `R` matrix. Not the most elegant, but 
-    # additionally solving least-sq incurs no significant cost. 
+  R <- qr_wrapper(sqrt_weighted_design)$R
   inverse <- - invert_gram_mat_from_qr(R)
   return(inverse)
 }
