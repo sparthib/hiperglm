@@ -12,15 +12,15 @@ hiper_glm <- function(design, outcome, model = "linear", option = list()) {
 }
 
 find_mle <- function(design, outcome, model, option) {
-  if (model == 'linear') {
-    if (is.null(option$mle_solver)) {
+  if (is.null(option$mle_solver)) {
+    if (model == 'linear') {
       result <- solve_via_least_sq(design, outcome)
     } else {
-      result <- solve_via_optim(design, outcome, option$mle_solver)
+      # TODO: implement iteratively reweighted least-sq
+      stop("Not yet implemented.")
     }
   } else {
-    # TODO: implement iteratively reweighted least-sq
-    stop("Not yet implemented.")
+    result <- solve_via_optim(design, outcome, option$mle_solver)
   }
   return(result)
 }
