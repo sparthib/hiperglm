@@ -53,10 +53,17 @@ simulate_data <- function(
     noise <- noise_magnitude * rnorm(n_obs)
     outcome <- expected_mean + noise 
   } else {
-    n_trial <- 1
+    n_trial <- option$n_trial
     prob <- 1 / (1 + exp(-expected_mean))
-    outcome <- rbinom(n_obs, n_trial, prob)
+    # Object type of `outcome` returned by this function is variable. One should 
+    # in general be careful about introducing this type of inconsistency, but 
+    # sometimes one might find it the most natural and/or reasonable thing to do.
+    if (is.null(n_trial)) {
+      outcome <- rbinom(n_obs, 1, prob)
+    } else {
+      n_success <- rbinom(n_obs, n_trial, prob)
+      outcome <- list(n_success = n_success, n_trial = n_trial)
+    }
   }
   return(list(design = design, outcome = outcome, coef_true = coef_true))
 }
-
