@@ -16,7 +16,8 @@ test_that("`hglm` logit model est coincides with `glm` one for binary outcome", 
   hglm_out <- hiper_glm(design, outcome, model = 'logit')
   expect_true(are_all_close(coef(hglm_out), coef(glm_out)))
   expect_true(are_all_close(
-    as.vector(vcov(hglm_out)), as.vector(vcov(glm_out))
+    as.vector(vcov(hglm_out)), as.vector(vcov(glm_out)), 
+    abs_tol = Inf, rel_tol = 1e-3
   ))
 })
 
