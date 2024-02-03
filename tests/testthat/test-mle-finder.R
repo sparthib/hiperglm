@@ -1,26 +1,26 @@
-test_that("linalg and optim least-sq coincide", {
-  n_obs <- 32; n_pred <- 4
-  data <- simulate_data(n_obs, n_pred, model = 'linear', seed = 1918)
+get_newton_and_bfgs_out <- function(model, n_obs = 32, n_pred = 4, data_seed = 1918) {
+  data <- simulate_data(n_obs, n_pred, model, seed = data_seed)
   design <- data$design; outcome <- data$outcome
-  via_linalg_out <- hiper_glm(design, outcome, model = 'linear')
+  via_newton_out <- hiper_glm(design, outcome, model)
   via_bfgs_out <- hiper_glm(
-    design, outcome, model = 'linear', option = list(mle_solver = 'BFGS')
+    design, outcome, model, option = list(mle_solver = 'BFGS')
   )
+  return(list(via_newton = via_newton_out, via_bfgs = via_bfgs_out))
+}
+
+test_that("linalg and optim least-sq coincide", {
+  out <- get_newton_and_bfgs_out("linear")
+    # Least-sq for linear model can be viewed as one iter of Newton, though
+    # admittedly non-ideal use of terminology
   expect_true(are_all_close(
-    coef(via_linalg_out), coef(via_bfgs_out), abs_tol = 1e-2, rel_tol = 1e-2
+    coef(out$via_newton), coef(out$via_bfgs), abs_tol = 1e-2, rel_tol = 1e-2
   ))
 })
 
 test_that("newton and bfgs outputs coincide on logit model", {
-  n_obs <- 32; n_pred <- 4
-  data <- simulate_data(n_obs, n_pred, model = 'logit', seed = 1918)
-  design <- data$design; outcome <- data$outcome
-  via_newton_out <- hiper_glm(design, outcome, model = 'logit')
-  via_bfgs_out <- hiper_glm(
-    design, outcome, model = 'logit', option = list(mle_solver = 'BFGS')
-  )
+  out <- get_newton_and_bfgs_out("logit")
   expect_true(are_all_close(
-    coef(via_newton_out), coef(via_bfgs_out), abs_tol = 1e-2, rel_tol = 1e-2
+    coef(out$via_newton), coef(out$via_bfgs), abs_tol = 1e-2, rel_tol = 1e-2
   ))
 })
 
