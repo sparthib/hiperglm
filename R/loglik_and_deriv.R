@@ -6,7 +6,7 @@ calc_linear_loglik <- function(reg_coef, design, outcome, noise_var = 1) {
 
 calc_linear_grad <- function(reg_coef, design, outcome, noise_var = 1) {
   predicted_val <- design %*% reg_coef
-  grad <- t(design) %*% (outcome - predicted_val)
+  grad <- t(design) %*% (outcome - predicted_val) / noise_var
   grad <- as.vector(grad)
   return(grad)
 }
